@@ -1,6 +1,6 @@
 {
   "name": "ghvm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tool for managing GitHub releases and installing them",
   "private": true,
   "scripts": {},
