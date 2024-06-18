@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "compile": "sh compile.sh"
+  }
+}
