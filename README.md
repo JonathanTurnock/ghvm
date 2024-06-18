@@ -48,7 +48,7 @@ The tool will then download the asset and install it in the specified directory.
 ## Configuration
 
 The configuration file is created in the current working directory and is named
-`.ghvmrc`.
+`.ghvmrc`
 
 It is a JSON file with the following structure:
 
@@ -62,7 +62,11 @@ It is a JSON file with the following structure:
   // Assets to install in the installation directory, all other assets will be ignored
   "assets": {
     "ASSET_NAME": "SYMLINK_NAME"
-  }
+  },
+
+  // Optional pre and post install scripts
+  "preInstall": "ABSOLUTE_PATH/pre.sh",
+  "postInstall": "ABSOLUTE_PATH/post.sh"
 }
 ```
 

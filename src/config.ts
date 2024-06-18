@@ -22,6 +22,12 @@ const configSchema = z.object({
   assets: z.record(z.coerce.string(), z.coerce.string()).describe(
     "The assets to install from the release as a map of symlink name to asset name i.e. { 'workmate': 'workmate-macos' }",
   ),
+  preInstall: z.coerce.string().optional().describe(
+    "The path to a pre-install script to run before installing the app",
+  ),
+  postInstall: z.coerce.string().optional().describe(
+    "The path to a post-install script to run after installing the app",
+  ),
 });
 
 export type Config = z.infer<typeof configSchema>;

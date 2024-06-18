@@ -1,8 +1,10 @@
 import { loadConfig } from "../config.ts";
-import { GithubClient } from "../clients/github.client.ts";
+import { Asset, GithubClient } from "../clients/github.client.ts";
 import inquirer from "npm:inquirer@9.2.23";
 import path from "node:path";
 import fs from "node:fs";
+
+type DownloadedAsset = Asset & { tempFilePath: string };
 
 /**
  * Ask the user to select a release from the list of releases.
@@ -57,10 +59,30 @@ export async function install(
   );
 
   console.log("Downloading Assets...");
+  const downloadedAssets: DownloadedAsset[] = [];
+
   for (const asset of assets) {
     console.log(`Downloading ${asset.name} (${asset.browser_download_url})...`);
     const tempFilePath = await githubClient.downloadAsset(asset);
     console.debug(`Downloaded ${asset.name} to ${tempFilePath}`);
+    downloadedAssets.push({ ...asset, tempFilePath });
+  }
+
+  console.log("Installing Assets...");
+
+  console.log("Executing Pre-Install Script...");
+
+  if (config.preInstall) {
+    await Deno.chmod(config.preInstall, 0o755);
+    const command = new Deno.Command(config.preInstall, {
+      stderr: "inherit",
+      stdout: "inherit",
+    });
+    await command.output();
+  }
+
+  for (const asset of downloadedAssets) {
+    const { tempFilePath } = asset;
 
     const targetPath = path.join(
       config.directory,
@@ -85,6 +107,16 @@ export async function install(
     await Deno.symlink(targetPath, symlinkPath);
     await Deno.chmod(targetPath, 0o755);
     await Deno.chmod(symlinkPath, 0o755);
+  }
+
+  console.log("Executing Post-Install Script...");
+  if (config.postInstall) {
+    await Deno.chmod(config.postInstall, 0o755);
+    const command = new Deno.Command(config.postInstall, {
+      stderr: "inherit",
+      stdout: "inherit",
+    });
+    await command.output();
   }
 
   console.log(`Finished installing ${release.tag_name}...`);
