@@ -65,3 +65,7 @@ It is a JSON file with the following structure:
   }
 }
 ```
+
+> The config is resolved and read using `rc` (https://www.npmjs.com/package/rc)
+> so the resolution [standards](https://www.npmjs.com/package/rc#standards)
+> apply
