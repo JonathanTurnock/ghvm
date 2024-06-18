@@ -1,6 +1,8 @@
 import z from "npm:zod@3.23.8";
 import rc from "npm:rc@1.2.8";
-import { PROGRAM_NAME } from "./constants.ts";
+import packageJson from "../package.json" with {
+  type: "json",
+};
 
 const configSchema = z.object({
   github: z.object({
@@ -34,7 +36,7 @@ export function generateValidConfig(config: Config): Config {
  */
 export function loadConfig(): Config {
   try {
-    const configs = rc(PROGRAM_NAME);
+    const configs = rc(packageJson.name);
 
     if (!configs.config) {
       throw new Error("Config file not found, run ghvm init to create one");

@@ -1,7 +1,9 @@
 import inquirer from "npm:inquirer@9.2.23";
 import { GithubClient } from "../clients/github.client.ts";
 import { generateValidConfig } from "../config.ts";
-import { PROGRAM_NAME } from "../constants.ts";
+import packageJson from "../../package.json" with {
+  type: "json",
+};
 
 export async function init() {
   console.log("Initializing...");
@@ -84,5 +86,5 @@ export async function init() {
 
   console.log("Generating config file...");
 
-  await Deno.writeTextFile(`.${PROGRAM_NAME}rc`, config, { create: true });
+  await Deno.writeTextFile(`.${packageJson.name}rc`, config, { create: true });
 }
