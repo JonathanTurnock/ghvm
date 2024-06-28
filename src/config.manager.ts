@@ -1,8 +1,9 @@
-import { ConfigEntity } from "./config.entity.ts";
+import { ConfigEntity, configEntitySchema } from "./config.entity.ts";
 import fs from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "npm:yaml@2.4.5";
 import { config } from "./config.ts";
+import { isNotUndefinedOrNull } from "./utils.ts";
 
 export class ConfigManager {
   /**
@@ -19,7 +20,7 @@ export class ConfigManager {
     return fs.readdirSync(config.configDir).map((folder: string) =>
       this.loadConfig(folder)
     )
-      .filter(Boolean);
+      .filter(isNotUndefinedOrNull);
   }
 
   /**
@@ -56,9 +57,10 @@ export class ConfigManager {
    * Saves a config to a file.
    */
   private saveConfig(config: ConfigEntity) {
-    const configFilePath = this.getConfigFilePath(config.id);
+    const safeConfig = configEntitySchema.parse(config);
+    const configFilePath = this.getConfigFilePath(safeConfig.id);
     this.ensureDir(path.dirname(configFilePath));
-    fs.writeFileSync(configFilePath, stringify(config));
+    fs.writeFileSync(configFilePath, stringify(safeConfig));
   }
 
   /**
@@ -70,7 +72,9 @@ export class ConfigManager {
     if (!fs.existsSync(configFilePath)) {
       return undefined;
     }
-    return parse(fs.readFileSync(configFilePath, "utf-8"));
+    return configEntitySchema.parse(
+      parse(fs.readFileSync(configFilePath, "utf-8")),
+    );
   }
 
   /**
