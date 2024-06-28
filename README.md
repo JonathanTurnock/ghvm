@@ -38,9 +38,9 @@ ghvm install
 The tool will then download the asset and install it in the specified directory.
 
 ```shell
-/usr/local/bin/my-app/v1.0.0/my-app-asset (Downloaded Asset)
+/usr/local/bin/$REPO_OWNER__$REPO_NAME/v1.0.0/my-app-asset (Downloaded Asset)
 
-/usr/local/bin/my-app/my-app-asset -> /usr/local/bin/my-app/v1.0.0/my-app-asset (Symlink to the downloaded asset)
+/usr/local/bin/my-app-asset -> /usr/local/bin/$REPO_OWNER__$REPO_NAME/v1.0.0/my-app-asset (Symlink to the downloaded asset)
 ```
 
 > The app will apply the permission of 755 to the asset and the symlink.

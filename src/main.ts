@@ -1,9 +1,9 @@
 import { Command } from "npm:commander@12.1.0";
-import { init } from "./commands/init.ts";
-import { install } from "./commands/install.ts";
 import packageJson from "../package.json" with {
   type: "json",
 };
+import { add } from "./commands/add.ts";
+import { install } from "./commands/install.ts";
 
 const program = new Command();
 
@@ -13,9 +13,9 @@ program
   .version(packageJson.version);
 
 program
-  .command("init")
-  .description("Initialize the configuration file")
-  .action(init);
+  .command("add")
+  .description("Add a new repsitory the configuration file")
+  .action(add);
 
 program
   .command("install")

@@ -1,12 +1,10 @@
 import inquirer from "npm:inquirer@9.2.23";
 import { GithubClient } from "../clients/github.client.ts";
-import { generateValidConfig } from "../config.ts";
-import packageJson from "../../package.json" with {
-  type: "json",
-};
+import { configManager } from "../config.manager.ts";
+import fs from "node:fs";
 
-export async function init() {
-  console.log("Initializing...");
+export async function add() {
+  console.log("Adding a new configuration...");
 
   const answers = await inquirer.prompt([
     {
@@ -70,21 +68,33 @@ export async function init() {
     ).then(resolve)
   );
 
-  const config: string = JSON.stringify(
-    generateValidConfig({
-      github: {
-        token: answers.token,
-        owner: answers.owner,
-        repo: answers.repo,
-      },
-      directory: answers.installDirectory,
-      assets,
-    }),
-    undefined,
-    2,
+  console.log("Adding config...");
+
+  const config = configManager.addConfig({
+    github: {
+      token: answers.token,
+      owner: answers.owner,
+      repo: answers.repo,
+    },
+    directory: answers.installDirectory,
+    assets,
+  });
+
+  console.log("Configuration added successfully!");
+
+  console.log("Creating pre-install script...");
+  const preInstallScriptPath = configManager.getPreInstallScriptPath(config);
+  fs.writeFileSync(
+    preInstallScriptPath,
+    `#!/bin/sh\n\necho 'Pre Install Script - ${preInstallScriptPath}'\n`,
   );
+  console.log("Pre-install script created successfully!");
 
-  console.log("Generating config file...");
-
-  await Deno.writeTextFile(`.${packageJson.name}rc`, config, { create: true });
+  console.log("Creating post-install script...");
+  const postInstallScriptPath = configManager.getPostInstallScriptPath(config);
+  fs.writeFileSync(
+    postInstallScriptPath,
+    `#!/bin/sh\n\necho 'Post Install Script - ${postInstallScriptPath}'\n`,
+  );
+  console.log("Post-install script created successfully!");
 }

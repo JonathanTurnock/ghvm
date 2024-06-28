@@ -1,8 +1,8 @@
-import { loadConfig } from "../config.ts";
 import { Asset, GithubClient } from "../clients/github.client.ts";
 import inquirer from "npm:inquirer@9.2.23";
 import path from "node:path";
 import fs from "node:fs";
+import { configManager } from "../config.manager.ts";
 
 type DownloadedAsset = Asset & { tempFilePath: string };
 
@@ -28,7 +28,27 @@ function askRelease(releases: string[]): Promise<string> {
 export async function install(
   { tag }: { tag?: string; configPath: string },
 ) {
-  const config = loadConfig();
+  const configs = configManager.getConfigs();
+
+  if (configs.length === 0) {
+    console.log("No repositories found. Please add a repository first.");
+    return;
+  }
+
+  const { configId } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "configId",
+      message: "Which repository do you want to install?",
+      choices: configs.map((it) => it.id),
+    },
+  ]);
+
+  const config = configs.find((it) => it.id === configId);
+
+  if (!config) {
+    throw new Error(`Config with id ${configId} not found`);
+  }
 
   const githubClient = new GithubClient(
     config.github.token,
@@ -71,10 +91,10 @@ export async function install(
   console.log("Installing Assets...");
 
   console.log("Executing Pre-Install Script...");
-
-  if (config.preInstall) {
-    await Deno.chmod(config.preInstall, 0o755);
-    const command = new Deno.Command(config.preInstall, {
+  const preInstallScriptPath = configManager.getPreInstallScriptPath(config);
+  if (fs.existsSync(preInstallScriptPath)) {
+    await Deno.chmod(preInstallScriptPath, 0o755);
+    const command = new Deno.Command(preInstallScriptPath, {
       stderr: "inherit",
       stdout: "inherit",
     });
@@ -86,6 +106,7 @@ export async function install(
 
     const targetPath = path.join(
       config.directory,
+      `${config.github.owner}__${config.github.repo}`,
       release.tag_name,
       asset.name,
     );
@@ -110,9 +131,10 @@ export async function install(
   }
 
   console.log("Executing Post-Install Script...");
-  if (config.postInstall) {
-    await Deno.chmod(config.postInstall, 0o755);
-    const command = new Deno.Command(config.postInstall, {
+  const postInstallScript = configManager.getPreInstallScriptPath(config);
+  if (fs.existsSync(postInstallScript)) {
+    await Deno.chmod(postInstallScript, 0o755);
+    const command = new Deno.Command(postInstallScript, {
       stderr: "inherit",
       stdout: "inherit",
     });
