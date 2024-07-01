@@ -14,10 +14,10 @@ Copy to `~/bin` if you want to make it available in your home directory.
 
 ## Usage
 
-Run `ghvm init` to initialize the configuration file.
+Run `ghvm add` to add a new configuration.
 
 ```shell
-ghvm init
+ghvm add
 ```
 
 You will be prompted to enter a GitHub Token, Repo owner and Repo name.
@@ -35,7 +35,9 @@ the selected asset.
 ghvm install
 ```
 
-The tool will then download the asset and install it in the specified directory.
+The tool will then download the asset and install it in the specified directory, i.e. if the install location is defined a `/usr/local/bin`.
+
+It will also symlink the asset from the release to the chosen name
 
 ```shell
 /usr/local/bin/$REPO_OWNER__$REPO_NAME/v1.0.0/my-app-asset (Downloaded Asset)
@@ -47,29 +49,19 @@ The tool will then download the asset and install it in the specified directory.
 
 ## Configuration
 
-The configuration file is created in the current working directory and is named
-`.ghvmrc`
+The configuration is located in the user working directory under `.ghvm`
 
-It is a JSON file with the following structure:
+CD into the respective Folder for the repo i.e. cd `~/.ghvm/$OWNER__$NAME/
 
-```json
-{
-  "token": "GITHUB_TOKEN", // GitHub Token
-  "owner": "OWNER", // GitHub Repo owner
-  "repo": "REPO", // GitHub Repo name
-  "install_dir": "/usr/local/bin", // Installation directory
+The config exists in a `config.yml` file
 
-  // Assets to install in the installation directory, all other assets will be ignored
-  "assets": {
-    "ASSET_NAME": "SYMLINK_NAME"
-  },
-
-  // Optional pre and post install scripts
-  "preInstall": "ABSOLUTE_PATH/pre.sh",
-  "postInstall": "ABSOLUTE_PATH/post.sh"
-}
+```yml
+id: $TOKEN_$OWNER
+github:
+  token: $TOKEN
+  owner: $OWNER
+  repo: $REPO
+directory: /usr/local/bin
+assets:
+  $RELEASE_ASSET: $SYMLINK NAME
 ```
-
-> The config is resolved and read using `rc` (https://www.npmjs.com/package/rc)
-> so the resolution [standards](https://www.npmjs.com/package/rc#standards)
-> apply
